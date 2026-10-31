@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
 *.ex5
+analysis/spike_reversion/results/reference_*.csv

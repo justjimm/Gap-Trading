@@ -1,0 +1,385 @@
+<title>Brent Spike Retracement Study</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column (~70ch) with full-width figures; verdict first, evidence after. */
+:root {
+  --bg: #f7f8f7; --surface: #ffffff; --ink: #14181b; --ink-2: #4a5157; --ink-3: #737b81;
+  --rule: #dde2e3; --grid: #e9edee; --accent: #0e6b74;
+  --s1: #2a78d6; --s2: #eb6834;
+  --pos: #2a78d6; --neg: #e34948; --mid: #f0efec;
+  --good: #0ca30c; --warn: #b07400; --bad: #d03b3b;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111416; --surface: #1a1e21; --ink: #eef1f2; --ink-2: #b9c1c6; --ink-3: #8b949a;
+  --rule: #2c3236; --grid: #252a2e; --accent: #4fb8c2;
+  --s1: #3987e5; --s2: #d95926; --pos: #3987e5; --neg: #e66767; --mid: #383835;
+  --good: #3fc23f; --warn: #fab219; --bad: #e66767; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111416; --surface: #1a1e21; --ink: #eef1f2; --ink-2: #b9c1c6; --ink-3: #8b949a;
+  --rule: #2c3236; --grid: #252a2e; --accent: #4fb8c2;
+  --s1: #3987e5; --s2: #d95926; --pos: #3987e5; --neg: #e66767; --mid: #383835;
+  --good: #3fc23f; --warn: #fab219; --bad: #e66767; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 70ch; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 26px; font-weight: 700; margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule); }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; }
+p { margin: 12px 0; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.meta { color: var(--ink-3); font-size: 14px; margin-top: 10px; }
+.verdict { margin-top: 28px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 22px; }
+.verdict ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 8px; }
+.tag { display: inline-flex; align-items: center; gap: 6px; font: 600 12px/1 var(--mono); padding: 4px 8px; border-radius: 99px; border: 1px solid currentColor; }
+.tag.bad { color: var(--bad); } .tag.warn { color: var(--warn); } .tag.good { color: var(--good); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 20px; }
+.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; min-width: 0; }
+.stat b { display: block; font: 700 28px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.stat span { color: var(--ink-2); font-size: 14px; line-height: 1.4; display: block; margin-top: 4px; }
+figure { margin: 24px 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 18px 12px; min-width: 0; }
+figcaption { font-size: 15px; color: var(--ink-2); margin-top: 6px; }
+figcaption b { color: var(--ink); }
+.figtitle { font: 700 16px/1.3 var(--display); }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: var(--ink-2); margin: 8px 0 4px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--ink-2); font: 12px var(--mono); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.grid2 figure { margin: 0; }
+.tbl { overflow-x: auto; margin: 16px 0; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font: 600 12px/1.3 var(--mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+tbody tr:last-child td { border-bottom: 0; }
+td.n { color: var(--neg); } td.p { color: var(--pos); }
+.refs { display: grid; gap: 14px; padding: 0; list-style: none; }
+.refs li { border-left: 2px solid var(--rule); padding-left: 14px; }
+.refs .fit { font: 600 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { overflow-wrap: anywhere; font: 14px var(--mono); background: var(--grid); padding: 1px 5px; border-radius: 3px; }
+.params { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+.param { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; min-width: 0; }
+.param h4 { margin: 0 0 6px; font: 700 15px/1.3 var(--display); }
+.param p { margin: 0; font-size: 15px; color: var(--ink-2); }
+.param code { overflow-wrap: anywhere; }
+#tip { position: fixed; pointer-events: none; z-index: 20; background: var(--surface); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 8px 10px; font: 13px/1.45 var(--mono); box-shadow: 0 4px 16px rgba(0,0,0,.12); max-width: 260px; }
+.hit { fill: transparent; cursor: crosshair; }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">UK Brent · M15 · Jan 2025 – Oct 2026</div>
+  <h1>Do Brent spikes give back half within a day?</h1>
+  <p class="meta" id="meta"></p>
+
+  <div class="verdict col">
+    <span class="tag warn">⚠ True as a description, not yet a trading edge</span>
+    <ul id="verdict"></ul>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <h2>1. Does the idea hold up?</h2>
+  <div class="col">
+    <p>A <b>spike</b> here is a move of at least 3× the recent average bar range within 4 bars (1 hour), measured against the 8 hours before the move. A dip is the same thing downwards. This definition was fixed before looking at any results. The <b>retracement</b> is how far price comes back towards where the move started, as a share of the move, measured over the next 96 bars (one trading day). The test never holds a position over a weekend.</p>
+    <p>To tell a real effect from chance, every spike is compared with <b>random moves of the same size</b> starting at random times. In a market with no memory, half of a move still gets retraced most of the time, simply because prices wander, so the comparison has to be against that.</p>
+  </div>
+
+  <figure>
+    <div class="figtitle">Share of moves that have retraced 50% after N bars (last 12 months)</div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Spikes and dips</span><span><i style="background:var(--s2)"></i>Random moves of the same size</span></div>
+    <svg id="curve" viewBox="0 0 900 320" role="img" aria-label="Line chart of 50% retracement hit rate by horizon"></svg>
+    <figcaption id="curveCap"></figcaption>
+  </figure>
+
+  <figure>
+    <div class="figtitle">Deepest retracement reached within a day (last 12 months)</div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Spikes and dips</span><span><i style="background:var(--s2)"></i>Random moves</span></div>
+    <svg id="depth" viewBox="0 0 900 300" role="img" aria-label="Bar chart of retracement depth distribution"></svg>
+    <figcaption>Most spikes do far more than give back half: about half of them retrace <b>more than 150%</b>, ending up beyond where the move began. A clean stop near 50% is uncommon. Brent's moves are noisy, and the 50% level is a point price passes through on the way rather than a level where it settles.</figcaption>
+  </figure>
+
+  <h3>Trading it: fade the spike, target 50%</h3>
+  <div class="col"><p>Rules: enter against the spike at the next bar's open. Take profit at the 50% retracement, put the stop 1 ATR beyond the spike's extreme (ATR here is the 8-hour average bar range), and exit after 96 bars if neither is hit. Each trade pays the spread recorded for its bar. Results are in <b>R</b>, multiples of the amount risked on the trade. "Random" places the same target and stop at random times in a random direction, repeated 200 times.</p></div>
+  <div class="tbl"><table id="meritTbl"></table></div>
+  <div class="col"><p id="meritText"></p></div>
+
+  <h2>2. Has this been done before?</h2>
+  <div class="col">
+    <p>Yes. The idea is a well-studied one. In academic work it is called <b>overreaction and reversal</b>. Traders know it as fading spikes, mean reversion after a volatility shock, or a "liquidity sweep" reversal. The research mostly agrees on two points: reversals after large intraday moves are real and statistically measurable, and once trading costs are counted, very little is left for a trader. The 50% figure has no special standing.</p>
+  </div>
+  <ul class="refs col" id="refs"></ul>
+
+  <h2>3. Parameters for an adaptive version</h2>
+  <div class="col">
+    <p>Four adaptive ways of spotting a spike were tested. Each compares the move with how the market had been behaving just before it, rather than using a fixed number of points:</p>
+    <ul>
+      <li><b>ATR move</b>: the size of the move over N bars, divided by the average bar range of the M bars before it.</li>
+      <li><b>Z-score</b>: the N-bar return divided by the standard deviation of N-bar returns over the previous M bars.</li>
+      <li><b>Range</b>: one bar's high-to-low range divided by the median range of the previous M bars.</li>
+      <li><b>EMA stretch</b>: how far price has moved from an M-bar moving average (EMA), in ATR units.</li>
+    </ul>
+    <p>Each was swept over window N, context M and threshold k, and combined with every exit setting: retracement target, stop distance, time limit, and entry either immediately or after a confirming bar. The first 9 months (Jan–Oct 2025) were used to choose settings, and the last 12 months to test them.</p>
+  </div>
+  <div class="stats" id="sweepStats"></div>
+
+  <figure>
+    <div class="figtitle">Each setting's result in the first 9 months vs the last 12 months (avg R per trade)</div>
+    <div class="legend"><span><i style="background:var(--s1);opacity:.5"></i>Sample of all settings</span><span><i style="background:var(--s2)"></i>The slower z-score group</span></div>
+    <svg id="scatter" viewBox="0 0 900 460" role="img" aria-label="Scatter plot of in-sample versus out-of-sample expectancy"></svg>
+    <figcaption id="scatterCap"></figcaption>
+  </figure>
+
+  <div class="grid2">
+    <figure>
+      <div class="figtitle">Last 12 months, entry at next open</div>
+      <svg id="heatA" viewBox="0 0 420 300" role="img" aria-label="Heatmap of expectancy by threshold and stop, next-open entry"></svg>
+    </figure>
+    <figure>
+      <div class="figtitle">Last 12 months, entry after a confirming bar</div>
+      <svg id="heatB" viewBox="0 0 420 300" role="img" aria-label="Heatmap of expectancy by threshold and stop, confirm entry"></svg>
+    </figure>
+  </div>
+  <p class="meta">Heatmaps: ATR-move detector, 50% target, 96-bar time limit, averaged over N and M. Rows are the threshold k (move ÷ ATR) and columns are the stop distance beyond the extreme in ATR. Blue is profitable and red is losing, in avg R per trade.</p>
+
+  <h3>Which choices help (avg R per trade, averaged over everything else)</h3>
+  <div class="tbl"><table id="margTbl"></table></div>
+
+  <h3>The one group that held up in both periods</h3>
+  <div class="col"><p id="pocketText"></p></div>
+  <div class="tbl"><table id="pocketTbl"></table></div>
+
+  <h3>When spikes happen (reference rules, both periods)</h3>
+  <div class="tbl"><table id="segTbl"></table></div>
+  <div class="col"><p id="segText"></p></div>
+
+  <h3>Recommended settings to test forward</h3>
+  <div class="params" id="params"></div>
+
+  <h2>Next step</h2>
+  <div class="col">
+    <p>Don't trade this with real money yet. The one promising group is small, and it was found by searching across both periods. The proper test is to run it forward on new data: an MT5 EA on a demo account, or the Strategy Tester on data after October 2026, with the settings below fixed in advance and every trade journalled. If it keeps around +0.1 R per trade over 150+ new trades, with London/NY-overlap and calm-market trades doing best, then it has earned a small live allocation.</p>
+    <p class="meta">Code: <code>analysis/spike_reversion/</code> on branch <code>claude/pensive-goldberg-chnowp</code>. Re-run with <code>python run_research.py path/to/new.csv</code>. Server time in your export is UTC: the EIA report shows up at 14:30 UTC in summer and the New York open at 14:00 UTC in winter.</p>
+  </div>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const D = __DATA__;
+const S = D.summary, M = S.merit, R = S.robust;
+const $ = id => document.getElementById(id);
+const pct = (x, d = 0) => (100 * x).toFixed(d) + "%";
+const r2 = x => (x >= 0 ? "+" : "") + x.toFixed(2);
+const r3 = x => (x >= 0 ? "+" : "") + x.toFixed(3);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent, text) { const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; parent && parent.appendChild(e); return e; }
+const tip = $("tip");
+function showTip(ev, html) { tip.innerHTML = html; tip.hidden = false;
+  const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(ev.clientY + 14, innerHeight - tip.offsetHeight - 8);
+  tip.style.left = x + "px"; tip.style.top = y + "px"; }
+const hideTip = () => tip.hidden = true;
+
+/* ---------- header ---------- */
+const O = M.OOS, I = M.IS, nullO = M.null_random_moves.OOS;
+$("meta").textContent = `${S.meta.bars.toLocaleString()} fifteen-minute bars · first 9 months (choosing settings) ${S.meta.is_range[0].slice(0,10)} → ${S.meta.is_range[1].slice(0,10)} · last 12 months (testing) ${S.meta.oos_range[0].slice(0,10)} → ${S.meta.oos_range[1].slice(0,10)} · Brent ${S.meta.price_min.toFixed(0)}–${S.meta.price_max.toFixed(0)} USD`;
+const best = R.best5_oos_vs_random;
+$("verdict").innerHTML = [
+  `<b>The retracement is real.</b> ${pct(O.retrace_hit["0.5"])} of last-year spikes gave back at least half the move within a day, against ${pct(nullO.retrace50)} for random moves of the same size. Spikes also reverse faster than random moves.`,
+  `<b>It is fast, not slow.</b> The typical spike gets back to 50% in ${O.median_bars_to["0.5"]} bars (${O.median_bars_to["0.5"]*15} minutes) and three-quarters do so within ${O.p75_bars_to_50} bars (${O.p75_bars_to_50*15/60} hours). A large part of that happens before a trade can be entered.`,
+  `<b>Fading it with fixed rules loses after the spread:</b> ${r2(O.trade.avgR)} R per trade over the last 12 months (${O.trade.trades} trades), and ${r2(I.trade.avgR)} R in the first 9 months. That is no better than placing the same trade at a random time.`,
+  `<b>Most of the ${R.configs_tested.toLocaleString()} settings tested failed.</b> Only ${pct(R.share_both_positive,1)} were profitable in both periods, about what chance would produce. The 20 best settings from the first 9 months averaged ${r2(R.top20_mean_IS_avgR)} R there and ${r2(R.top20_mean_OOS_avgR)} R in the last 12 months.`,
+  `<b>One lead is worth testing forward:</b> slower 2-hour moves measured against 2–4 days of context, entered after a confirming bar, with a tight stop. Its settings made between +0.01 and +0.19 R per trade in each period, most of them around +0.08 R, but no single setting is statistically significant.`
+].map(s => `<li>${s}</li>`).join("");
+$("stats").innerHTML = [
+  [pct(O.retrace_hit["0.5"]), `of spikes retraced 50% within a day (random: ${pct(nullO.retrace50)})`],
+  [`${O.median_bars_to["0.5"]*15} min`, "median time to the 50% level"],
+  [pct(O.continued_first), "pushed on past the extreme first (stop risk)"],
+  [r2(O.trade.avgR) + " R", "per trade fading spikes, after spread (last 12 months)"],
+].map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
+
+/* ---------- axis helper ---------- */
+function frame(svg, W, H, m, xs, ys, yTicks, yFmt, xTicks, xFmt, xLabel, yLabel) {
+  for (const t of yTicks) { const y = ys(t);
+    el("line", { x1: m.l, x2: W - m.r, y1: y, y2: y, stroke: css(t === 0 ? "--ink-3" : "--grid"), "stroke-width": 1 }, svg);
+    el("text", { x: m.l - 8, y: y + 4, "text-anchor": "end" }, svg, yFmt(t)); }
+  for (const t of xTicks) el("text", { x: xs(t), y: H - m.b + 18, "text-anchor": "middle" }, svg, xFmt(t));
+  if (xLabel) el("text", { x: (m.l + W - m.r) / 2, y: H - 4, "text-anchor": "middle" }, svg, xLabel);
+  if (yLabel) el("text", { x: 14, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 14 ${(m.t + H - m.b) / 2})` }, svg, yLabel);
+}
+
+/* ---------- 1. curve ---------- */
+function drawCurve() {
+  const svg = $("curve"); svg.innerHTML = ""; const W = 900, H = 320, m = { l: 56, r: 24, t: 14, b: 44 };
+  const h = D.curve.h, n = h.length;
+  const xs = i => m.l + (i / (n - 1)) * (W - m.l - m.r), ys = v => m.t + (1 - v) * (H - m.t - m.b);
+  frame(svg, W, H, m, xs, ys, [0, .25, .5, .75, 1], v => pct(v), [...h.keys()], i => h[i] < 4 ? `${h[i]*15}m` : `${h[i]*15/60}h`, "time after the spike bar", null);
+  const ser = [["spike", "--s1", "Spikes"], ["random", "--s2", "Random"]];
+  for (const [k, c] of ser) {
+    el("path", { d: D.curve[k].map((v, i) => (i ? "L" : "M") + xs(i) + " " + ys(v)).join(""), fill: "none", stroke: css(c), "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+    const i = n - 1; el("circle", { cx: xs(i), cy: ys(D.curve[k][i]), r: 4, fill: css(c), stroke: css("--surface"), "stroke-width": 2 }, svg);
+  }
+  const cross = el("line", { y1: m.t, y2: H - m.b, stroke: css("--ink-3"), "stroke-dasharray": "3 3", visibility: "hidden" }, svg);
+  for (let i = 0; i < n; i++) {
+    const w = (W - m.l - m.r) / (n - 1);
+    const r = el("rect", { class: "hit", x: xs(i) - w / 2, y: m.t, width: w, height: H - m.t - m.b }, svg);
+    r.addEventListener("mousemove", e => { cross.setAttribute("x1", xs(i)); cross.setAttribute("x2", xs(i)); cross.setAttribute("visibility", "visible");
+      showTip(e, `<b>${h[i]} bars (${h[i]*15 >= 60 ? h[i]*15/60 + " h" : h[i]*15 + " min"})</b><br>Spikes: ${pct(D.curve.spike[i],1)}<br>Random: ${pct(D.curve.random[i],1)}`); });
+    r.addEventListener("mouseleave", () => { hideTip(); cross.setAttribute("visibility", "hidden"); });
+  }
+  $("curveCap").innerHTML = `Within the first bar, <b>${pct(D.curve.spike[0])}</b> of spikes have already given back half, against ${pct(D.curve.random[0])} for random moves. The gap narrows over the day: ${pct(D.curve.spike[n-1])} against ${pct(D.curve.random[n-1])} by 24 hours. ${D.event_n} spikes, ${D.null_n} random moves.`;
+}
+
+/* ---------- 2. depth bars ---------- */
+function drawDepth() {
+  const svg = $("depth"); svg.innerHTML = ""; const W = 900, H = 300, m = { l: 56, r: 16, t: 14, b: 44 };
+  const L = D.depth.labels, n = L.length, gw = (W - m.l - m.r) / n, bw = Math.min(34, gw / 2 - 6);
+  const ymax = .6, ys = v => m.t + (1 - v / ymax) * (H - m.t - m.b);
+  frame(svg, W, H, m, i => m.l + gw * (i + .5), ys, [0, .2, .4, .6], v => pct(v), [...L.keys()], i => L[i], "deepest retracement reached, as a share of the move", null);
+  [["spike", "--s1", -1], ["random", "--s2", 1]].forEach(([k, c, side]) => D.depth[k].forEach((v, i) => {
+    const x = m.l + gw * (i + .5) + (side < 0 ? -bw - 1 : 1), y = ys(v), h = ys(0) - y;
+    const p = el("path", { d: `M${x} ${ys(0)}V${y + 4}q0 -4 4 -4h${bw - 8}q4 0 4 4V${ys(0)}Z`, fill: css(c) }, svg);
+    p.addEventListener("mousemove", e => showTip(e, `<b>${L[i]}</b><br>${k === "spike" ? "Spikes" : "Random"}: ${pct(v,1)}`)); p.addEventListener("mouseleave", hideTip);
+  }));
+}
+
+/* ---------- merit table ---------- */
+function meritTable() {
+  const row = (lab, f) => `<tr><td>${lab}</td><td>${f(I)}</td><td>${f(O)}</td></tr>`;
+  const cls = x => x < 0 ? "n" : "p";
+  $("meritTbl").innerHTML = `<thead><tr><th>Reference rules</th><th>First 9 months</th><th>Last 12 months</th></tr></thead><tbody>` +
+    row("Spikes detected", x => `${x.events} (${x.events_per_week.toFixed(1)}/week)`) +
+    row("Median spike size", x => `${x.median_move.toFixed(2)} USD (${x.median_move_atr.toFixed(1)}× ATR)`) +
+    row("Retraced 25 / 38 / 50 / 62 / 100% within a day", x => ["0.25","0.382","0.5","0.618","1.0"].map(k => pct(x.retrace_hit[k])).join(" / ")) +
+    row("Median bars to 50%", x => `${x.median_bars_to["0.5"]} (75% within ${x.p75_bars_to_50})`) +
+    row("Pushed on past the extreme first", x => pct(x.continued_first)) +
+    row("Trades taken", x => x.trade.trades) +
+    row("Win rate", x => pct(x.trade.win)) +
+    row("Hit target / stop / time limit", x => `${pct(x.trade.pct_target)} / ${pct(x.trade.pct_stop)} / ${pct(x.trade.pct_time)}`) +
+    `<tr><td>Avg R per trade, after spread</td><td class="${cls(I.trade.avgR)}">${r3(I.trade.avgR)}</td><td class="${cls(O.trade.avgR)}">${r3(O.trade.avgR)}</td></tr>` +
+    `<tr><td>Same trade at random times (avg R, 5–95% range)</td><td>${r3(I.baseline.avgR)} (${r3(I.baseline.avgR_p05)} … ${r3(I.baseline.avgR_p95)})</td><td>${r3(O.baseline.avgR)} (${r3(O.baseline.avgR_p05)} … ${r3(O.baseline.avgR_p95)})</td></tr></tbody>`;
+  $("meritText").innerHTML = `The win rate is over 50%, but the strategy still loses. Winners stop at the 50% level, while losers run the whole distance to the stop. On top of that, the spread is charged on every trade, and spreads are widest during the volatile moments when spikes happen. Placing the same target and stop at random times gives almost the same result, so the spike signal adds no detectable edge under these rules. Before costs the result is roughly break-even: ${r3(R.segments_reference.direction["dip (buy)"].avgR_gross)} R for buying dips and ${r3(R.segments_reference.direction["spike up (sell)"].avgR_gross)} R for selling spikes.`;
+}
+
+/* ---------- refs ---------- */
+const REFS = [
+  ["Closest match", "Borgards, Czudaj & Van Hoang (2021), Price overreactions in the commodity futures market: an intraday analysis of the Covid-19 pandemic impact. Resources Policy 71.", "https://ideas.repec.org/a/eee/jrpoli/v71y2021ics0301420720309946.html",
+   "Defines an overreaction as a large price change between two turning points followed by a proportional move back the other way, which is close to your idea. Tested on 20 commodity futures (crude included) at 1-minute to 1-hour intervals. They confirm overreactions exist, and found crude had more downside overreactions than upside during Covid."],
+  ["Reversals real, cost kills them", "Grant, Wolf & Yu (2005), Intraday price reversals in the US stock index futures market: a 15-year study. Journal of Banking & Finance 29(5).", "https://ideas.repec.org/a/eee/jbfina/v29y2005i5p1311-1327.html",
+   "Found highly significant reversals after large moves at the open over 15 years. Their significance drops sharply once the bid-ask spread is charged, which is the same pattern found here."],
+  ["Reversal grows with the move", "Fung, Mok & Lam (2000), Intraday price reversals for index futures in the US and Hong Kong. Journal of Banking & Finance.", "https://scholars.hkbu.edu.hk/en/publications/intraday-price-reversals-for-index-futures-in-the-us-and-hong-kon/",
+   "Larger initial moves are followed by larger reversals. This supports measuring the target as a share of the spike, as you proposed."],
+  ["Oil news spikes", "Li & Geman, An analysis of intraday market response to crude oil inventory shocks. Journal of Energy Markets.", "https://www.risk.net/journal-of-energy-markets/5728636/an-analysis-of-intraday-market-response-to-crude-oil-inventory-shocks",
+   "Crude jumps on EIA inventory surprises and then partly reverses, with the effect lasting about 25 minutes. That fits the finding here that most of the retracement comes within the first few bars."],
+  ["Sharp bursts revert", "Christensen, Oomen & Renò, The drift burst hypothesis (arXiv).", "https://arxiv.org/pdf/2601.08974",
+   "Studies short, extreme price bursts in high-frequency data and finds they are typically followed by a partial reversal. This is the formal, high-frequency version of a spike that gets given back."],
+  ["Small after costs", "Trends and reversion in financial markets on time scales from minutes to decades (arXiv, 2025).", "https://arxiv.org/pdf/2501.16772",
+   "Reversion over minutes is measurable, but too small to trade profitably after costs, which matches the sweep results here."],
+  ["Daily shocks: mostly efficient", "Mazouz & Wang (2014), commodity futures response to one-day shocks. Applied Financial Economics.", "https://orca.cardiff.ac.uk/61689",
+   "After adjusting for risk, almost all of 18 commodity futures react efficiently to daily shocks. On daily data the reversal largely disappears."],
+  ["The 50% level", "Bulkowski, Fibonacci retracements (ThePatternSite).", "https://thepatternsite.com/fib.html",
+   "In about 24,000 automatically detected retracements, 38%, 50% and 62% turned up no more often than any other level. That matches the depth chart above: price does not stop specially at 50%."],
+  ["Practitioner versions", "Bollinger and Keltner band fades, Connors-style short-term mean reversion, and \"liquidity sweep\" or stop-hunt reversals.", null,
+   "All are the same trade with a different trigger: a band touch, an oscillator extreme, or a sweep of a recent high or low. Your ATR- and z-score-based detection is the more rigorous form of the band fade."]
+];
+$("refs").innerHTML = REFS.map(([fit, t, u, d]) => `<li><div class="fit">${fit}</div><div>${u ? `<a href="${u}" target="_blank" rel="noopener">${t}</a>` : t}</div><div style="color:var(--ink-2);font-size:15px">${d}</div></li>`).join("");
+
+/* ---------- sweep ---------- */
+$("sweepStats").innerHTML = [
+  [R.configs_tested.toLocaleString(), "settings tested (detector × exit × entry)"],
+  [pct(R.share_IS_positive, 1), "profitable in the first 9 months"],
+  [pct(R.share_OOS_positive, 1), "profitable in the last 12 months"],
+  [pct(R.share_both_positive, 1), `profitable in both (chance alone would give about ${pct(R.share_IS_positive * R.share_OOS_positive, 1)})`],
+].map(([b, s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join("");
+
+function drawScatter() {
+  const svg = $("scatter"); svg.innerHTML = ""; const W = 900, H = 460, m = { l: 64, r: 20, t: 14, b: 48 };
+  const lo = -0.45, hi = 0.35;
+  const xs = v => m.l + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (W - m.l - m.r);
+  const ys = v => m.t + (1 - (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo)) * (H - m.t - m.b);
+  const ticks = [-0.4, -0.2, 0, 0.2];
+  frame(svg, W, H, m, xs, ys, ticks, r2, ticks, r2, "first 9 months: avg R per trade", "last 12 months: avg R per trade");
+  el("line", { x1: xs(0), x2: xs(0), y1: m.t, y2: H - m.b, stroke: css("--ink-3") }, svg);
+  el("text", { x: xs(hi) - 4, y: ys(hi) + 14, "text-anchor": "end" }, svg, "profitable in both ↗");
+  for (const [a, b] of D.scatter.all) el("circle", { cx: xs(a), cy: ys(b), r: 2.6, fill: css("--s1"), "fill-opacity": .35 }, svg);
+  for (const [a, b, Mm, k, st] of D.scatter.pocket) {
+    const c = el("circle", { cx: xs(a), cy: ys(b), r: 5, fill: css("--s2"), stroke: css("--surface"), "stroke-width": 2 }, svg);
+    c.addEventListener("mousemove", e => showTip(e, `<b>z-score N=8 M=${Mm} k=${k}</b><br>stop ${st} ATR, confirm entry, 50% target<br>first 9 months ${r3(a)} R · last 12 months ${r3(b)} R`)); c.addEventListener("mouseleave", hideTip);
+  }
+  $("scatterCap").innerHTML = `Each dot is one setting. If doing well in the first 9 months predicted doing well in the last 12, the dots would run diagonally. They don't: the correlation is <b>${R.corr_IS_OOS_avgR.toFixed(2)}</b>, and most settings fall in the losing (lower-left) area. The orange dots are the one group that stayed above zero in both periods.`;
+}
+
+function heat(svgId, key) {
+  const svg = $(svgId); svg.innerHTML = ""; const h = R[key];
+  const W = 420, H = 300, m = { l: 70, r: 10, t: 10, b: 50 };
+  const cw = (W - m.l - m.r) / h.cols.length, ch = (H - m.t - m.b) / h.rows.length, lim = 0.08;
+  const mix = (a, b, t) => { const p = x => [1,3,5].map(i => parseInt(x.slice(i, i + 2), 16)); const A = p(a), B = p(b);
+    return "rgb(" + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",") + ")"; };
+  h.rows.forEach((k, i) => h.cols.forEach((s, j) => {
+    const v = h.values[i][j], t = Math.min(1, Math.abs(v) / lim);
+    const fill = mix(css("--mid"), css(v >= 0 ? "--pos" : "--neg"), t);
+    const x = m.l + j * cw, y = m.t + (h.rows.length - 1 - i) * ch;
+    const r = el("rect", { x: x + 1, y: y + 1, width: cw - 2, height: ch - 2, rx: 3, fill }, svg);
+    el("text", { x: x + cw / 2, y: y + ch / 2 + 4, "text-anchor": "middle", style: `fill:${t > .6 ? "#fff" : css("--ink")}` }, svg, r2(v));
+    r.addEventListener("mousemove", e => showTip(e, `<b>k = ${k}, stop ${s} ATR</b><br>avg R per trade ${r3(v)}`)); r.addEventListener("mouseleave", hideTip);
+  }));
+  h.rows.forEach((k, i) => el("text", { x: m.l - 8, y: m.t + (h.rows.length - 1 - i) * ch + ch / 2 + 4, "text-anchor": "end" }, svg, `k ${k}`));
+  h.cols.forEach((s, j) => el("text", { x: m.l + j * cw + cw / 2, y: H - m.b + 18, "text-anchor": "middle" }, svg, `${s}`));
+  el("text", { x: m.l + (W - m.l - m.r) / 2, y: H - 8, "text-anchor": "middle" }, svg, "stop beyond extreme (ATR)");
+}
+
+function margTable() {
+  const names = { kind: "Detector", N: "Window N (bars)", M: "Context M (bars)", k: "Threshold k", f_target: "Retracement target", stop_atr: "Stop beyond extreme (ATR)", time_stop: "Time limit (bars)", entry: "Entry" };
+  const nice = (c, v) => c === "entry" ? (v === "confirm" ? "after confirming bar" : "next open") : c === "f_target" ? pct(+v, 1).replace(".0", "") : v;
+  let html = `<thead><tr><th>Choice</th><th>Value</th><th>First 9 months</th><th>Last 12 months</th></tr></thead><tbody>`;
+  for (const c in names) for (const [v, o] of Object.entries(R.marginal[c]))
+    html += `<tr><td>${names[c]}</td><td>${nice(c, v)}</td><td class="${o.IS < 0 ? "n" : "p"}">${r3(o.IS)}</td><td class="${o.OOS < 0 ? "n" : "p"}">${r3(o.OOS)}</td></tr>`;
+  $("margTbl").innerHTML = html + "</tbody>";
+}
+
+function pocket() {
+  const P = D.pocket;
+  $("pocketText").innerHTML = `One group stayed profitable in both periods: <b>z-score detection over a 2-hour window (N = 8), measured against 2 to 4 days of context (M = 192–384), threshold 2.5–3, entry after a confirming bar, a tight 0.5–1 ATR stop beyond the extreme, the 50% target, and a 12-hour time limit</b>. In plain terms, these are larger moves that unfold over a couple of hours, judged against several days of normal behaviour. That is closer to what you described than the 1-hour definition. Two cautions: the t-statistics are all below 1.6, so no single setting is significant, and the group was picked by looking at both periods, so the last 12 months are not a clean test for it. Most of its settings stay profitable when the spread is 50% higher.`;
+  let html = `<thead><tr><th>Setting</th><th>Period</th><th>Trades</th><th>Win</th><th>Avg R</th><th>t-stat</th><th>Avg R at 1.5× spread</th><th>Random 95th pct</th><th>Median hold</th></tr></thead><tbody>`;
+  for (const [k, v] of Object.entries(P)) for (const per of ["IS", "OOS"]) { const x = v[per];
+    html += `<tr><td>${k.replace("zscore ", "")}</td><td>${per === "IS" ? "First 9 months" : "Last 12 months"}</td><td>${x.trades}</td><td>${pct(x.win)}</td><td class="${x.avgR < 0 ? "n" : "p"}">${r3(x.avgR)}</td><td>${x.t.toFixed(2)}</td><td>${r3(x.avgR_cost15)}</td><td>${r3(x.base95)}</td><td>${x.med_hold * 15} min</td></tr>`; }
+  $("pocketTbl").innerHTML = html + "</tbody>";
+}
+
+function segTable() {
+  const G = R.segments_reference, names = { session: "Session", vol_regime: "Volatility regime", direction: "Direction", eia: "EIA release bar", week_open: "First hour of the week" };
+  let html = `<thead><tr><th>Group</th><th>Value</th><th>Trades</th><th>Win</th><th>Avg R before costs</th><th>Avg R after spread</th></tr></thead><tbody>`;
+  for (const c in names) for (const [v, o] of Object.entries(G[c])) {
+    const lab = v === "True" ? "yes" : v === "False" ? "no" : v;
+    html += `<tr><td>${names[c]}</td><td>${lab}</td><td>${o.trades}</td><td>${pct(o.win)}</td><td class="${o.avgR_gross < 0 ? "n" : "p"}">${r3(o.avgR_gross)}</td><td class="${o.avgR < 0 ? "n" : "p"}">${r3(o.avgR)}</td></tr>`; }
+  $("segTbl").innerHTML = html + "</tbody>";
+  $("segText").innerHTML = `Spikes that come with news are the worst ones to fade. EIA-release spikes (${G.eia.True.trades} trades) averaged ${r3(G.eia.True.avgR)} R, because they come from new information and tend to keep going. Asia-hours spikes are also poor: liquidity is thin and the spread costs the most relative to the move. The London/NY overlap is the only session near break-even, and calm markets do better than volatile ones. Buying dips beat selling spikes, but Brent ranged from about ${S.meta.price_min.toFixed(0)} to ${S.meta.price_max.toFixed(0)} USD over the sample, so part of that is the trend, which may not persist.`;
+}
+
+function params() {
+  const P = [
+    ["Detector", "Z-score of the N-bar return against the standard deviation of N-bar returns over the previous M bars. This scales automatically with volatility, which is the adaptive behaviour you asked for.", "N = 8 bars, M = 192–384 bars, k = 2.5–3"],
+    ["Entry", "Don't enter on the spike bar. Wait for the first bar that fails to make a new extreme and closes against the spike (give up after 8 bars), then enter at the next open. This helped in both periods, across all four detectors.", "confirm, max wait 8 bars"],
+    ["Target", "50% of the move, measured from the extreme. 25% and 38% targets were worse in both periods, because winners that small don't cover the spread.", "f = 0.5 (0.618 also acceptable)"],
+    ["Stop", "Just beyond the extreme, scaled by the ATR of the bars before the spike. A tight stop worked best for this detector, although across all settings wider stops lost less. Use it with risk-based position sizing so every trade risks the same amount.", "0.5–1.0 × ATR(M) beyond extreme"],
+    ["Time limit", "Most trades finish within 1–2 hours. A 12-hour limit is enough, and 24 hours adds nothing.", "48 bars"],
+    ["Filters", "Skip EIA Wednesday (14:30 UTC in summer, 15:30 UTC in winter), the first hour after the weekend and Asia hours, and skip bars whose spread is above about 1.5× the median. The session and news filters come from the reference test above. The spread cap is a sensible limit but was not tested. The London/NY overlap gives the best conditions.", "spread ≤ 30 pts (untested); overlap ≈ 12:00–17:00 UTC"],
+  ];
+  $("params").innerHTML = P.map(([h, p, c]) => `<div class="param"><h4>${h}</h4><p>${p}</p><p style="margin-top:8px"><code>${c}</code></p></div>`).join("");
+}
+
+function drawAll() { drawCurve(); drawDepth(); drawScatter(); heat("heatA", "heat_OOS_next_open"); heat("heatB", "heat_OOS_confirm"); }
+meritTable(); margTable(); pocket(); segTable(); params(); drawAll();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawAll);
+new MutationObserver(drawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
